@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISOLATION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #0a0a0a;
+    --off-black: #111111;
+    --dark: #1a1a1a;
+    --border: #222222;
+    --muted: #444444;
+    --dim: #888888;
+    --white: #f0f0f0;
+    --pure: #ffffff;
+    --accent: #c8ff00;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-weight: 300;
+    cursor: crosshair;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    border-bottom: 0.5px solid transparent;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(10,10,10,0.95);
+    border-color: var(--border);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 0.15em;
+    color: var(--pure);
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--pure); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 0 3rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 2rem;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 18vw, 18rem);
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    color: var(--pure);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.5s forwards;
+  }
+
+  .hero-title span {
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--border);
+  }
+
+  .hero-title span.accent-line {
+    -webkit-text-stroke: 1px var(--accent);
+    color: transparent;
+  }
+
+  .hero-sub {
+    margin-top: 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.7s forwards;
+  }
+
+  .hero-desc {
+    max-width: 300px;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: var(--dim);
+    letter-spacing: 0.02em;
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: var(--pure);
+    color: var(--black);
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: crosshair;
+    transition: background 0.2s, color 0.2s;
+    border: none;
+  }
+  .btn-primary:hover {
+    background: var(--accent);
+  }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    color: var(--dim);
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 0.5px solid var(--border);
+    cursor: crosshair;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-ghost:hover {
+    color: var(--white);
+    border-color: var(--muted);
+  }
+
+  .hero-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    right: 28%;
+    width: 0.5px;
+    background: var(--border);
+    opacity: 0;
+    animation: fadeIn 1.5s ease 1s forwards;
+  }
+
+  .hero-number {
+    position: absolute;
+    top: 50%;
+    right: calc(28% + 2rem);
+    transform: translateY(-50%) rotate(90deg);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    white-space: nowrap;
+    opacity: 0;
+    animation: fadeIn 1.5s ease 1.2s forwards;
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    overflow: hidden;
+    padding: 1rem 0;
+    background: var(--off-black);
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .marquee-dot {
+    color: var(--accent);
+    margin-right: 3rem;
+  }
+
+  /* PRODUCTS */
+  .products {
+    padding: 8rem 3rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 4rem;
+    border-bottom: 0.5px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    letter-spacing: 0.05em;
+    color: var(--pure);
+    line-height: 1;
+  }
+
+  .section-count {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .product-card {
+    background: var(--black);
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+
+  .product-card:hover .product-overlay { opacity: 1; }
+  .product-card:hover .product-img-placeholder { transform: scale(1.03); }
+
+  .product-img-placeholder {
+    aspect-ratio: 3/4;
+    background: var(--off-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.6s ease;
+    position: relative;
+  }
+
+  .product-img-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      var(--border) 40px,
+      var(--border) 40.5px
+    );
+    opacity: 0.3;
+  }
+
+  .product-img-label {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+  }
+
+  .product-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,10,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .product-info {
+    padding: 1.25rem;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .product-name {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 0.25rem;
+  }
+
+  .product-type {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+  }
+
+  .product-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  /* ABOUT */
+  .about {
+    padding: 8rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .about-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .about-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: 0.03em;
+    color: var(--pure);
+    margin-bottom: 2rem;
+  }
+
+  .about-title em {
+    font-style: normal;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--muted);
+  }
+
+  .about-body {
+    font-size: 0.85rem;
+    line-height: 2;
+    color: var(--dim);
+    max-width: 420px;
+  }
+
+  .about-body p + p { margin-top: 1.2rem; }
+
+  .about-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .about-stat {
+    padding: 2rem 0;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .about-stat:first-child { border-top: 0.5px solid var(--border); }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    letter-spacing: 0.05em;
+    color: var(--pure);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: right;
+    max-width: 120px;
+    line-height: 1.6;
+  }
+
+  /* WAITLIST */
+  .waitlist {
+    padding: 8rem 3rem;
+    border-top: 0.5px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    background: var(--off-black);
+  }
+
+  .waitlist-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 0.9;
+    letter-spacing: 0.03em;
+    color: var(--pure);
+  }
+
+  .waitlist-title span {
+    display: block;
+    color: var(--accent);
+  }
+
+  .waitlist-sub {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: var(--dim);
+  }
+
+  .waitlist-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .form-input {
+    background: transparent;
+    border: none;
+    border-bottom: 0.5px solid var(--border);
+    padding: 0.75rem 0;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+    cursor: crosshair;
+  }
+
+  .form-input::placeholder { color: var(--muted); }
+  .form-input:focus { border-color: var(--dim); }
+
+  .form-note {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  .footer-copy {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--white); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero { padding: 0 1.5rem 2rem; }
+    .hero-line, .hero-number { display: none; }
+    .hero-sub { flex-direction: column; gap: 2rem; align-items: flex-start; }
+    .hero-cta { align-items: flex-start; }
+    .products { padding: 4rem 1.5rem; }
+    .product-grid { grid-template-columns: 1fr; }
+    .about { padding: 4rem 1.5rem; grid-template-columns: 1fr; gap: 3rem; }
+    .waitlist { padding: 4rem 1.5rem; grid-template-columns: 1fr; gap: 3rem; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">ISOLATION</a>
+  <ul class="nav-links">
+    <li><a href="#products">Collection</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#waitlist">Waitlist</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-line"></div>
+  <div class="hero-number">EST. 2025 — COLLECTION 001</div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">Collection 001 — Drop Coming Soon</p>
+    <h1 class="hero-title">
+      ISO
+      <span>LA</span>
+      <span class="accent-line">TION</span>
+    </h1>
+    <div class="hero-sub">
+      <p class="hero-desc">
+        Built for those who move in silence. Heavyweight fabrics, minimal markings, maximum presence.
+      </p>
+      <div class="hero-cta">
+        <a href="#waitlist" class="btn-primary">Join the Waitlist</a>
+        <a href="#products" class="btn-ghost">View Collection</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">ISOLATION</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">COLLECTION 001</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">HEAVY TEE</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">OVERHEAD SWEATER</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">ZIP UP JACKET</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">ISOLATION</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">COLLECTION 001</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">HEAVY TEE</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">OVERHEAD SWEATER</span>
+    <span class="marquee-item marquee-dot">✦</span>
+    <span class="marquee-item">ZIP UP JACKET</span>
+    <span class="marquee-item marquee-dot">✦</span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="products" id="products">
+  <div class="section-header reveal">
+    <div>
+      <p class="section-label">The Collection</p>
+      <h2 class="section-title">COLLECTION 001</h2>
+    </div>
+    <span class="section-count">03 Pieces</span>
+  </div>
+
+  <div class="product-grid reveal">
+
+    <div class="product-card">
+      <div class="product-img-placeholder">
+        <span class="product-img-label">HEAVY TEE</span>
+      </div>
+      <div class="product-overlay">
+        <a href="#waitlist" class="btn-primary">Notify Me</a>
+      </div>
+      <div class="product-info">
+        <div>
+          <p class="product-name">Heavy Tee</p>
+          <p class="product-type">Oversized / 400gsm Cotton</p>
+        </div>
+        <span class="product-tag">Soon</span>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img-placeholder">
+        <span class="product-img-label">SWEATER</span>
+      </div>
+      <div class="product-overlay">
+        <a href="#waitlist" class="btn-primary">Notify Me</a>
+      </div>
+      <div class="product-info">
+        <div>
+          <p class="product-name">Overhead Sweater</p>
+          <p class="product-type">Heavyweight / Drop Shoulder</p>
+        </div>
+        <span class="product-tag">Soon</span>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img-placeholder">
+        <span class="product-img-label">ZIP JACKET</span>
+      </div>
+      <div class="product-overlay">
+        <a href="#waitlist" class="btn-primary">Notify Me</a>
+      </div>
+      <div class="product-info">
+        <div>
+          <p class="product-name">Zip Up Jacket</p>
+          <p class="product-type">Full Zip / Fleece Lined</p>
+        </div>
+        <span class="product-tag">Soon</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-left reveal">
+    <h2 class="about-title">
+      BUILT IN<br>
+      <em>SILENCE</em>
+    </h2>
+    <div class="about-body">
+      <p>Isolation is not a feeling. It's a choice. A decision to move without noise, to build without validation, to exist on your own terms.</p>
+      <p>Every piece in Collection 001 is designed for those who already know this. No loud graphics. No excess. Just fabric that holds weight — literally and otherwise.</p>
+    </div>
+  </div>
+  <div class="about-right reveal">
+    <div class="about-stat">
+      <span class="stat-num">001</span>
+      <span class="stat-label">First collection. Built different.</span>
+    </div>
+    <div class="about-stat">
+      <span class="stat-num">03</span>
+      <span class="stat-label">Pieces. No filler.</span>
+    </div>
+    <div class="about-stat">
+      <span class="stat-num">400</span>
+      <span class="stat-label">GSM heavyweight cotton</span>
+    </div>
+    <div class="about-stat">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Limited run. No restocks.</span>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section class="waitlist" id="waitlist">
+  <div class="reveal">
+    <h2 class="waitlist-title">
+      GET IN<br>
+      <span>EARLY.</span>
+    </h2>
+    <p class="waitlist-sub">Collection 001 drops soon. Waitlist gets first access and early pricing before public release.</p>
+  </div>
+
+  <form class="waitlist-form reveal" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <div class="form-group">
+      <label class="form-label" for="name">Full Name</label>
+      <input class="form-input" type="text" id="name" name="name" placeholder="Your name" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="email">Email Address</label>
+      <input class="form-input" type="email" id="email" name="email" placeholder="your@email.com" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="interest">Most interested in</label>
+      <select class="form-input" id="interest" name="interest">
+        <option value="" disabled selected>Select a piece</option>
+        <option value="tee">Heavy Tee</option>
+        <option value="sweater">Overhead Sweater</option>
+        <option value="jacket">Zip Up Jacket</option>
+        <option value="all">All Three</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-primary">Join the Waitlist</button>
+    <p class="form-note">No spam. Drop notification only. Unsubscribe anytime.</p>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">ISOLATION</span>
+  <span class="footer-copy">© 2025 Isolation. All rights reserved.</span>
+  <ul class="footer-links">
+    <li><a href="#products">Collection</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#waitlist">Waitlist</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Nav scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
