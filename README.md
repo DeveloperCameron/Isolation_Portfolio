@@ -27,7 +27,7 @@ This is a real business landing page, not a tutorial project. Isolation is a clo
 - Scrolling marquee ticker — CSS animation, no JS library
 - Product showcase grid with hover overlays
 - About section with brand ethos and stats
-- Waitlist form with client-side success state
+- Waitlist form with a simulated success state (no backend — for demonstration)
 - Scroll-reveal animations using IntersectionObserver
 - Fully responsive — built mobile-first
 ---
