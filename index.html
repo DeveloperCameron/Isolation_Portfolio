@@ -166,6 +166,11 @@
     background: var(--accent);
   }
 
+  .btn-primary:disabled {
+    cursor: default;
+    opacity: 0.9;
+  }
+
   .btn-ghost {
     display: inline-block;
     padding: 1rem 2.5rem;
@@ -756,7 +761,7 @@
     <p class="waitlist-sub">Collection 001 drops soon. Waitlist gets first access and early pricing before public release.</p>
   </div>
 
-  <form class="waitlist-form reveal" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+  <form class="waitlist-form reveal">
     <div class="form-group">
       <label class="form-label" for="name">Full Name</label>
       <input class="form-input" type="text" id="name" name="name" placeholder="Your name" required>
@@ -808,6 +813,17 @@
     });
   }, { threshold: 0.1 });
   reveals.forEach(el => observer.observe(el));
+
+  // Waitlist form — simulated success (no real backend)
+  const waitlistForm = document.querySelector('.waitlist-form');
+  waitlistForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = waitlistForm.querySelector('button[type="submit"]');
+    btn.textContent = "You're on the list!";
+    btn.disabled = true;
+    btn.style.background = 'var(--accent)';
+    waitlistForm.reset();
+  });
 </script>
 
 </body>
